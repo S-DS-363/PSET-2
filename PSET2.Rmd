@@ -1,0 +1,63 @@
+---
+title: "Homework 02: PCA"
+author: "Lena Chan, Gaby Branin, Harry Hegeman, Lauren Salzman"
+date: "2/10/2020"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+subtitle: S&DS 363
+---
+_______________________________________________________________________________
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+cbb <- read.csv("/Users/lenachan/Desktop/S&DS 363/cbb.csv")
+cbb
+
+#for the purposes of this homework assignment, we will focus on the variables G, W, ADJOE, ADJDE, BARTHAG, TOR, TORD, ORB, DRB, and FTR, where..
+
+#G: Number of games played
+
+#W: Number of games won
+
+#ADJOE: Adjusted Offensive Efficiency (An estimate of the offensive efficiency (points scored per 100 possessions) a team would have against the average Division I defense)
+
+#ADJDE: Adjusted Defensive Efficiency (An estimate of the defensive efficiency (points allowed per 100 possessions) a team would have against the average Division I offense)
+
+#BARTHAG: Power Rating (Chance of beating an average Division I team)
+
+#TOR: Turnover Percentage Allowed (Turnover Rate)
+
+#TORD: Turnover Percentage Committed (Steal Rate)
+
+#ORB: Offensive Rebound Percentage
+
+#DRB: Defensive Rebound Percentage
+
+#FTR : Free Throw Rate (How often the given team shoots Free Throws)
+
+cbb2 <- cbb[ ,c("G", "W", "ADJOE", "ADJDE", "BARTHAG", "TOR", "TORD", "ORB", "DRB", "FTR")]
+
+#Only select variables with complete data
+
+cbb2 <- cbb2[complete.cases(cbb2),]
+
+cbb2
+#Compute the correlation matrix between all variables
+
+cor(cbb2)
+library(corrplot)
+corrplot(cor(cbb2), method = "ellipse")
+
+```
+
+
+
+
+
