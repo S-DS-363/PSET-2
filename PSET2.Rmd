@@ -20,7 +20,25 @@ knitr::opts_chunk$set(echo = TRUE)
 cbb <- read.csv("/Users/lenachan/Desktop/S&DS 363/cbb.csv")
 cbb
 
-#for the purposes of this homework assignment, we will focus on the variables G, W, ADJOE, ADJDE, BARTHAG, TOR, TORD, ORB, DRB, and FTR, where..
+#isolate continuous variables
+
+cbb2 <- cbb[ ,c("G", "W", "ADJOE", "ADJDE", "BARTHAG", "EFG_O", "EFG_D", "TOR", "TORD", "ORB", "DRB", "FTR", "FTRD", "X2P_O", "X2P_D", "X3P_O", "X3P_D", "ADJ_T", "WAB", "SEED", "YEAR")]
+
+#only select variables with complete data
+
+cbb2 <- cbb2[complete.cases(cbb2),]
+
+#compute the correlation matrix
+
+cor(cbb2)
+library(corrplot)
+corrplot(cor(cbb2), method = "ellipse")
+
+#because they are highly correlated with each other, we will focus on the variables G, W, ADJOE, ADJDE, WAB, BARTHAG, X2P_D, X2P_O, EFG_O, and EFG_D
+
+#subset the data
+
+cbb3 <- cbb2[ ,c("G", "W", "ADJOE", "ADJDE", "WAB", "BARTHAG", "X2P_D", "X2P_O", "EFG_O", "EFG_D") ]
 
 #G: Number of games played
 
@@ -30,33 +48,25 @@ cbb
 
 #ADJDE: Adjusted Defensive Efficiency (An estimate of the defensive efficiency (points allowed per 100 possessions) a team would have against the average Division I offense)
 
+#WAB: Wins Above Bubble (The bubble refers to the cut off between making the NCAA March Madness Tournament and not making it)
+
 #BARTHAG: Power Rating (Chance of beating an average Division I team)
 
-#TOR: Turnover Percentage Allowed (Turnover Rate)
+#X2P_O: Two-Point Shooting Percentage
 
-#TORD: Turnover Percentage Committed (Steal Rate)
+#X2P_D: Two-Point Shooting Percentage Allowed
 
-#ORB: Offensive Rebound Percentage
+#EFG_O: Effective Field Goal Percentage Shot
 
-#DRB: Defensive Rebound Percentage
+#EFG_D: Effective Field Goal Percentage Allowed
 
-#FTR : Free Throw Rate (How often the given team shoots Free Throws)
+#1. Assess multivariate normality.
 
-cbb2 <- cbb[ ,c("G", "W", "ADJOE", "ADJDE", "BARTHAG", "TOR", "TORD", "ORB", "DRB", "FTR")]
+names(cbb3[1])
 
-#Only select variables with complete data
-
-cbb2 <- cbb2[complete.cases(cbb2),]
-
-cbb2
-#Compute the correlation matrix between all variables
-
-cor(cbb2)
-library(corrplot)
-corrplot(cor(cbb2), method = "ellipse")
-
-```
-
+for (i in 1:10){
+   qqnorm(cbb3[,i], xlab=names(cbb3[i])) 
+}
 
 
 
