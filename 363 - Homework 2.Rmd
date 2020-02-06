@@ -1,0 +1,199 @@
+---
+title: "363 - Homework 2"
+author: "Gaby Branin"
+date: "2/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Read in Data
+```{r}
+bball <- as.data.frame(read.csv("/Users/gabriellebranin/Desktop/Classes/Spring 2020/S&DS 363/college-basketball-dataset/cbb.csv", header = TRUE))
+
+head(bball)
+dim(bball)
+str(bball)
+
+#only select complete cases for code to work
+bball <- bball[complete.cases(bball),]
+
+```
+### List of Columns in Data Set
+
+TEAM
+CONF (conference)
+G = Number of games played
+W = Number of games won
+ADJOE = Adjusted Offensive Efficiency
+ADJDE = Adjusted Defensive Efficiency
+BARTHAG = Power Rating (Chance of beating an average Division I team)
+EFG_O = Effective Field Goal Percentage Shot
+EFG_D = Effective Field Goal Percentage Allowed
+TOR = Turnover Rate
+TORD = Steal Rate
+ORB = Offensive Rebound Percentage
+DRB = Defensive Rebound Percentage
+FTR = Free Throw Rate
+FTRD = Free Throw Rate Allowed
+2P_O = Two-Point Shooting Percentage
+2P_D = Two-Point Shooting Percentage Allowed
+3P_O = Three-Point Shooting Percentage
+3P_D = Three-Point Shooting Percentage Allowed
+ADJ_T = Adjusted Tempo (An estimate of the tempo (possessions per 40 minutes) a team would have)
+WAB = Wins Above Bubble (bubble refers to the cut off between making the NCAA March Madness Tournament and not making it)
+POSTSEASON = Round where the given team was eliminated or where their season ended
+SEED = Seed in the NCAA March Madness Tournament
+YEAR
+
+
+# Question 1
+###First, discuss whether your data seems to have a multivariate normal distribution. Make univariate plots (boxplots, normal quantile plots as appropriate). Then make transformations as appropriate. You do NOT need to turn all this in, but describe what you did. THEN make a chi-square quantile plot of the data. Turn in your chi-square quantile plot as appropriate and comment on what you see. NOTE that multivariate normality is NOT a requirement for PCA to work!
+
+
+To test for multivariate normality, we will run a Chi-Squared test. If the graph is linear with a slope of approximately one, the data has a multivariate normal distribution.
+
+```{r}
+#remove non integer or numeric values
+bballNumeric <- bball[ , -c(1, 2, 22)]
+
+#univariate plots (boxplots, normal quantile plots)
+for (i in length(bballNumeric)){
+  qqplot(bballNumeric[ ,i])
+}
+
+#chart to look for non-linearity, get correlation, and make histograms at once
+chart.Correlation(bballNumeric, histogram=TRUE, pch=19)
+
+backup <- bballNumeric
+
+#transformation (if appropriate)-- remove year and seed
+bballNumeric <- bballNumeric[ ,-c(20,21)]
+
+#repeated chart with year and seed (non-linear items) removed
+chart.Correlation(bballNumeric, histogram=TRUE, pch=19)
+
+#download CSQPlot function
+source("http://www.reuningscherer.net/STAT660/R/CSQPlot.r.txt")
+
+CSQPlot(bballNumeric, label="College Basketball Data \n2015-2019")
+
+```
+Using the Chi-Squared Quantile plot, this data does look like it has multivariate normality. It is linear with a slope of one, except for one outlier that may need to be removed. 
+
+
+# Question 2
+###Compute the correlation matrix between all variables (In R use the cor() function or one of the other cool correlation plots.). Comment on relationships you do/do not observe. Do you think PCA will work well?
+
+##Install proper packages
+```{r}
+#install.packages("corrplot")
+library(corrplot)
+
+#install.packages("PerformanceAnalytics")
+library(PerformanceAnalytics)
+
+backup <- bballNumeric
+
+#remove TOR, TORD, ORB, DRB, FTR, FTRD (do not have strong correlations in previous plot)
+bballNumeric <- bballNumeric[ , -c(8:13)]
+
+#New corr plot
+corrplot(cor(bballNumeric), method = "ellipse")
+
+#Numeric Correlations
+round(cor(bballNumeric), 2)
+
+#Other corr plot options
+corrplot(cor(bballNumeric), method = "ellipse", order="FPC") #first principal component order
+corrplot(cor(bballNumeric), method = "ellipse", order="hclust") #hierarchical clustering order
+corrplot(cor(bballNumeric), method = "ellipse", order="AOE") #angular order of the eigenvectors
+corrplot.mixed(cor(bballNumeric), lower.col="black", upper = "ellipse", tl.col = "black", number.cex=0.7, order = "hclust",
+               tl.pos = "lt", tl.cex=.7) #mixed numbers and ellipses
+
+```
+
+#Question 3
+###Perform Principle components analysis using the Correlation matrix (standardized variables). Think about how many principle components to retain. To make this decision look at
+  - Total variance explained by a given number of principle components
+  - The ‘eigenvalue > 1’ criteria
+  - The ‘scree plot elbow’ method (turn in the scree plot)
+  - Parallel Analysis : think about whether this is appropriate based on what you
+discover in question 1.
+
+```{r}
+pc <- princomp(bballNumeric, cor=TRUE)
+names(pc)
+pc
+
+#total variance explained by a given number of principle components
+
+
+#eigen value > 1 criteria
+round(pc$sdev^2, 2)
+  #components 1 thorugh 4 have eigenvalues greater than 1
+
+#scree plot elbow method
+screeplot(pc, type="lines", col="blue", pch = 19, main = "Scree Plot of College Basketball Data")
+  #elbow looks like it is at component 3
+
+#parallel analysis
+source("http://www.reuningscherer.net/STAT660/R/parallel.r.txt")
+parallelplot(pc)
+  #It looks as though componenets 1 and 2 are above the Longman and Allen methods.
+
+```
+Based on the methods, we have decided to keep 3 princple components.
+
+#Question 4
+###For principle components you decide to retain, examine the loadings (principle components) and think about an interpretation for each retained component if possible.
+
+```{r}
+View(pc)
+(pc_comp1 <- pc[["loadings"]][,1])
+(pc_comp2 <- pc[["loadings"]][,2])
+(pc_comp3 <- pc[["loadings"]][,3])
+
+#create table to make it easier to view
+pc_comp_table <- data.frame(pc_comp1, pc_comp2, pc_comp3)
+
+```
+Possible interpretations:
+  + comp 1 = highest influence on wins, wins above bubble, adjusted defensive and offensive officiency, and power rating (BARTHAG)
+  
+  + comp 2 = high influence on Effective Field Goal Percentage Shot and Allowed, 2 point offense and defense
+  
+  + comp 3 = high influence on games played, 3 point offense and defense, adjusted tempo
+
+
+
+#Question 5
+###Make a score plot of the scores for at least one pair of component scores (one and two, one and three, two and three, etc). Discuss any trends/groupings you observe (probably, this will be ‘none’). As a bonus, try to make a 95% Confidence Ellipse for two of your components. You might want to also try making a bi-plot if you’re using R.
+
+```{r}
+source("http://reuningscherer.net/stat660/r/ciscoreplot.R.txt")
+
+#score plot
+ciscoreplot(pc, c(1,2), bball[,1])
+ciscoreplot(pc, c(2,3), bball[,1])
+ciscoreplot(pc, c(1,3), bball[,1])
+
+```
+There are no trends in the score plot. Each graph looks randomly distributed throughout the 95% confidence ellipse.
+
+```{r}
+
+#biplot
+biplot(pc,choices=c(1,2),pc.biplot=T)
+
+```
+
+
+#Question 6
+###Write a paragraph summarizing your findings, and your opinions about the effectiveness of using principle components on this data. Include evidence based on scatterplots of linearity in higher dimensional space, note any multivariate outliers in your score plot, comment on sample size relative to number of variables, etc.
+```{r}
+
+```
+
+
