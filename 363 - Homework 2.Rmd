@@ -86,8 +86,8 @@ Using the Chi-Squared Quantile plot, this data does look like it has multivariat
 # Question 2
 ###Compute the correlation matrix between all variables (In R use the cor() function or one of the other cool correlation plots.). Comment on relationships you do/do not observe. Do you think PCA will work well?
 
-##Install proper packages
 ```{r}
+#Install proper packages
 #install.packages("corrplot")
 library(corrplot)
 
