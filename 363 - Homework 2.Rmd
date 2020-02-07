@@ -1,6 +1,6 @@
 ---
 title: "363 - Homework 2"
-author: "Gaby Branin"
+author: "Gaby Branin, Lena Chan, Harry Hegeman, Lauren Salzman"
 date: "2/3/2020"
 output: html_document
 ---
@@ -58,18 +58,26 @@ To test for multivariate normality, we will run a Chi-Squared test. If the graph
 #remove non integer or numeric values
 bballNumeric <- bball[ , -c(1, 2, 22)]
 
-#univariate plots (boxplots, normal quantile plots)
-for (i in length(bballNumeric)){
-  qqplot(bballNumeric[ ,i])
-}
+#loops for univariate plots - boxplots and normal quantile plots
+# for (i in 1:length(bballNumeric)){
+#   boxplot(bballNumeric[,i], main = paste("Boxplot of ", names(bballNumeric)[i]))
+# }
+
+# for (i in 1:length(bballNumeric)){
+#   qqnorm(bballNumeric[,i], ylab = names(bballNumeric)[i])
+# }
+
+```
+Using the histograms, BARTHAG is the only plot that does not look normal. It looks right skewed. 
+Using the quantile plots, BARTHAG, seed, year are not normally distributed.  
+
+```{r}
 
 #chart to look for non-linearity, get correlation, and make histograms at once
 chart.Correlation(bballNumeric, histogram=TRUE, pch=19)
 
-backup <- bballNumeric
-
-#transformation (if appropriate)-- remove year and seed
-bballNumeric <- bballNumeric[ ,-c(20,21)]
+#transformation (if appropriate)-- remove barthag, year, and seed
+bballNumeric <- bballNumeric[ ,-c(5,20,21)]
 
 #repeated chart with year and seed (non-linear items) removed
 chart.Correlation(bballNumeric, histogram=TRUE, pch=19)
@@ -87,17 +95,17 @@ Using the Chi-Squared Quantile plot, this data does look like it has multivariat
 ###Compute the correlation matrix between all variables (In R use the cor() function or one of the other cool correlation plots.). Comment on relationships you do/do not observe. Do you think PCA will work well?
 
 ```{r}
-#Install proper packages
-#install.packages("corrplot")
+#install proper packages
 library(corrplot)
-
-#install.packages("PerformanceAnalytics")
 library(PerformanceAnalytics)
 
 backup <- bballNumeric
 
+#Corr plot
+corrplot(cor(bballNumeric), method = "ellipse")
+
 #remove TOR, TORD, ORB, DRB, FTR, FTRD (do not have strong correlations in previous plot)
-bballNumeric <- bballNumeric[ , -c(8:13)]
+bballNumeric <- bballNumeric[ , -c(7:12)]
 
 #New corr plot
 corrplot(cor(bballNumeric), method = "ellipse")
@@ -109,10 +117,12 @@ round(cor(bballNumeric), 2)
 corrplot(cor(bballNumeric), method = "ellipse", order="FPC") #first principal component order
 corrplot(cor(bballNumeric), method = "ellipse", order="hclust") #hierarchical clustering order
 corrplot(cor(bballNumeric), method = "ellipse", order="AOE") #angular order of the eigenvectors
-corrplot.mixed(cor(bballNumeric), lower.col="black", upper = "ellipse", tl.col = "black", number.cex=0.7, order = "hclust",
+corrplot.mixed(cor(bballNumeric), lower.col="black", upper = "ellipse", tl.col = "black", number.cex=0.7, order = "AOE",
                tl.pos = "lt", tl.cex=.7) #mixed numbers and ellipses
 
 ```
+Based on the Chi-Squared quantile plot and the Correlation plots above, we believe PCA will work well. They have shown that the data has multivariate normality and have many correlated variables. 
+
 
 #Question 3
 ###Perform Principle components analysis using the Correlation matrix (standardized variables). Think about how many principle components to retain. To make this decision look at
@@ -123,6 +133,7 @@ corrplot.mixed(cor(bballNumeric), lower.col="black", upper = "ellipse", tl.col =
 discover in question 1.
 
 ```{r}
+#principal components of standardized variables
 pc <- princomp(bballNumeric, cor=TRUE)
 names(pc)
 pc
@@ -141,7 +152,7 @@ screeplot(pc, type="lines", col="blue", pch = 19, main = "Scree Plot of College 
 #parallel analysis
 source("http://www.reuningscherer.net/STAT660/R/parallel.r.txt")
 parallelplot(pc)
-  #It looks as though componenets 1 and 2 are above the Longman and Allen methods.
+  #It looks as though componenets 1 and 2 are above the Longman and Allen methods. 3 is along the cusp.
 
 ```
 Based on the methods, we have decided to keep 3 princple components.
@@ -157,16 +168,15 @@ View(pc)
 
 #create table to make it easier to view
 pc_comp_table <- data.frame(pc_comp1, pc_comp2, pc_comp3)
+View(pc_comp_table)
 
 ```
 Possible interpretations:
-  + comp 1 = highest influence on wins, wins above bubble, adjusted defensive and offensive officiency, and power rating (BARTHAG)
+  + comp 1 = wins and efficiency (W, WAB, ADJOE, ADJDE)
   
-  + comp 2 = high influence on Effective Field Goal Percentage Shot and Allowed, 2 point offense and defense
+  + comp 2 = shooting offense and defense (EFG_O, EFG_D, X2P_O, X2P_D, X3P_D)
   
-  + comp 3 = high influence on games played, 3 point offense and defense, adjusted tempo
-
-
+  + comp 3 = games, 3 point offense, adjusted tempo ??????? (G, X3P_O, ADJ_T)
 
 #Question 5
 ###Make a score plot of the scores for at least one pair of component scores (one and two, one and three, two and three, etc). Discuss any trends/groupings you observe (probably, this will be ‘none’). As a bonus, try to make a 95% Confidence Ellipse for two of your components. You might want to also try making a bi-plot if you’re using R.
@@ -192,8 +202,5 @@ biplot(pc,choices=c(1,2),pc.biplot=T)
 
 #Question 6
 ###Write a paragraph summarizing your findings, and your opinions about the effectiveness of using principle components on this data. Include evidence based on scatterplots of linearity in higher dimensional space, note any multivariate outliers in your score plot, comment on sample size relative to number of variables, etc.
-```{r}
-
-```
 
 
