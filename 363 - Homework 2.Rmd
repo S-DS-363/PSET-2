@@ -64,7 +64,7 @@ bballNumeric <- bball[ , -c(1, 2, 22)]
 # }
 
 # for (i in 1:length(bballNumeric)){
-#   qqnorm(bballNumeric[,i], ylab = names(bballNumeric)[i])
+#   qqPlot(bballNumeric[,i], ylab = names(bballNumeric)[i])
 # }
 
 ```
