@@ -235,8 +235,8 @@ biplot(pc,choices=c(1,2),pc.biplot=T)
 
 ```
 Looking at the length and direction of the vectors, we concluded:
-* component 1 is most affected by the variables G, W, ADJOE, and ADJDE.
-* component 2 is most affected by the variables EFG_O, EFG_D, ADJDE, and ADJOE.
+* component 1 is most affected by the variables WAB and W.
+* component 2 is most affected by the variables EFG_O, EFG_D, X2P_O, X2P_D, X3P_O, X3P_D, ADJ_T.
 * The variables ADJDE and ADJOE affect both component 1 and component 2.
 
 
