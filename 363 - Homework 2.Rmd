@@ -1,8 +1,10 @@
 ---
 title: "363 - Homework 2"
 author: "Gaby Branin, Lena Chan, Harry Hegeman, Lauren Salzman"
-date: "2/3/2020"
-output: html_document
+date: "2/11/2020"
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -24,57 +26,91 @@ bball <- bball[complete.cases(bball),]
 ### List of Columns in Data Set
 
 TEAM
+
 CONF (conference)
+
 G = Number of games played
+
 W = Number of games won
+
 ADJOE = Adjusted Offensive Efficiency
+
 ADJDE = Adjusted Defensive Efficiency
+
 BARTHAG = Power Rating (Chance of beating an average Division I team)
+
 EFG_O = Effective Field Goal Percentage Shot
+
 EFG_D = Effective Field Goal Percentage Allowed
+
 TOR = Turnover Rate
+
 TORD = Steal Rate
+
 ORB = Offensive Rebound Percentage
+
 DRB = Defensive Rebound Percentage
+
 FTR = Free Throw Rate
+
 FTRD = Free Throw Rate Allowed
+
 2P_O = Two-Point Shooting Percentage
+
 2P_D = Two-Point Shooting Percentage Allowed
+
 3P_O = Three-Point Shooting Percentage
+
 3P_D = Three-Point Shooting Percentage Allowed
+
 ADJ_T = Adjusted Tempo (An estimate of the tempo (possessions per 40 minutes) a team would have)
+
 WAB = Wins Above Bubble (bubble refers to the cut off between making the NCAA March Madness Tournament and not making it)
+
 POSTSEASON = Round where the given team was eliminated or where their season ended
+
 SEED = Seed in the NCAA March Madness Tournament
+
 YEAR
 
 
 # Question 1
-###First, discuss whether your data seems to have a multivariate normal distribution. Make univariate plots (boxplots, normal quantile plots as appropriate). Then make transformations as appropriate. You do NOT need to turn all this in, but describe what you did. THEN make a chi-square quantile plot of the data. Turn in your chi-square quantile plot as appropriate and comment on what you see. NOTE that multivariate normality is NOT a requirement for PCA to work!
+### First, discuss whether your data seems to have a multivariate normal distribution. Make univariate plots (boxplots, normal quantile plots as appropriate). Then make transformations as appropriate. You do NOT need to turn all this in, but describe what you did. THEN make a chi-square quantile plot of the data. Turn in your chi-square quantile plot as appropriate and comment on what you see. NOTE that multivariate normality is NOT a requirement for PCA to work!
 
 
 ```{r}
+#install.packages("car")
+library(car)
+
 #remove non integer or numeric values, but keep name of teams column for later parts of problem set.
 bballNumeric <- bball[ , -c(2, 22)]
 
+#remove team names for the purposes of boxplots and normal quantile plots
+bballNumeric_noNames <- bballNumeric[,-c(1)]
+
 #loops for univariate plots - boxplots and normal quantile plots
-# for (i in 1:length(bballNumeric)){
-#   boxplot(bballNumeric[,i], main = paste("Boxplot of ", names(bballNumeric)[i]))
+# for (i in 1:length(bballNumeric_noNames)){
+#  boxplot(bballNumeric_noNames[,i], main = paste("Boxplot of ", names(bballNumeric_noNames)[i]))
 # }
 
-# for (i in 1:length(bballNumeric)){
-#   qqPlot(bballNumeric[,i], ylab = names(bballNumeric)[i])
+# for (i in 1:length(bballNumeric_noNames)){
+#   qqPlot(bballNumeric_noNames[,i], ylab = names(bballNumeric_noNames)[i])
 # }
 
 ```
 Using the histograms, BARTHAG is the only plot that does not look normally distrbuted. It looks left skewed. We did a log transformation of BARTHAG, but it still appeared left skewed. Therefore, we decided to remove BARTHAG. Using the quantile plots, BARTHAG, seed, and year are not normally distributed. Seed and year were categorical numeric variables, we decided to remove those as well instead of trying transformations.
 
 ```{r}
+#install.packages("corrplot")
+#install.packages("PerformanceAnalytics")
+library(corrplot)
+library(PerformanceAnalytics)
+
 #chart to look for non-linearity, get correlation, and make histograms at once
 chart.Correlation(bballNumeric[,-1], histogram=TRUE, pch=19)
 
-#transformation (if appropriate)-- remove barthag, year, and seed
-bballNumeric <- bballNumeric[ ,-c(5,20,21)]
+#transformation (if appropriate)-- remove barthag, seed, and year
+bballNumeric <- bballNumeric[ ,-c(6,21,22)]
 
 #repeated chart with year and seed (non-linear items) removed
 chart.Correlation(bballNumeric[,-1], histogram=TRUE, pch=19)
@@ -89,20 +125,16 @@ To test for multivariate normality, we will run a Chi-Squared test. Using the Ch
 
 
 # Question 2
-###Compute the correlation matrix between all variables (In R use the cor() function or one of the other cool correlation plots.). Comment on relationships you do/do not observe. Do you think PCA will work well?
+### Compute the correlation matrix between all variables (In R use the cor() function or one of the other cool correlation plots.). Comment on relationships you do/do not observe. Do you think PCA will work well?
 
 ```{r}
-#install proper packages
-library(corrplot)
-library(PerformanceAnalytics)
-
 backup <- bballNumeric
 
 #Corr plot
 corrplot(cor(bballNumeric[,-1]), method = "ellipse")
 
 #remove TOR, TORD, ORB, DRB, FTR, FTRD (do not have strong correlations in previous plot)
-bballNumeric <- bballNumeric[ , -c(7:12)]
+bballNumeric <- bballNumeric[ , -c(8:13)]
 
 #New corr plot
 corrplot(cor(bballNumeric[,-1]), method = "ellipse")
@@ -122,8 +154,8 @@ corrplot.mixed(cor(bballNumeric[,-1]), lower.col="black", upper = "ellipse", tl.
 Based on the Chi-Squared quantile plot and the Correlation plots above, we believe PCA will work well. They have shown that the data has multivariate normality and have many correlated variables. 
 
 
-#Question 3
-###Perform Principle components analysis using the Correlation matrix (standardized variables). Think about how many principle components to retain. To make this decision look at
+# Question 3
+### Perform Principle components analysis using the Correlation matrix (standardized variables). Think about how many principle components to retain. To make this decision look at
   - Total variance explained by a given number of principle components
   - The ‘eigenvalue > 1’ criteria
   - The ‘scree plot elbow’ method (turn in the scree plot)
@@ -138,7 +170,7 @@ print(summary(pc),digits=2,loadings=pc$loadings,cutoff=0)
 
 #total variance explained by a given number of principle components
 sum(pc$sdev[1:3])/12
-#38% of the variance is explained by these 3 principle components. 
+#40.85% of the variance is explained by these 3 principle components. 
 
 #eigen value > 1 criteria
 round(pc$sdev^2, 2)
@@ -156,23 +188,23 @@ parallelplot(pc)
 ```
 Based on the methods, we have decided to keep 3 princple components.
 
-#Question 4
-###For principle components you decide to retain, examine the loadings (principle components) and think about an interpretation for each retained component if possible.
+# Question 4
+### For principle components you decide to retain, examine the loadings (principle components) and think about an interpretation for each retained component if possible.
 
 ```{r}
-View(pc)
 (pc_comp1 <- pc[["loadings"]][,1])
 (pc_comp2 <- pc[["loadings"]][,2])
 (pc_comp3 <- pc[["loadings"]][,3])
 
 #create table to make it easier to view
 pc_comp_table <- data.frame(pc_comp1, pc_comp2, pc_comp3)
-View(pc_comp_table)
+pc_comp_table
 
 ```
 Using a threshold of 0.3, our possible interpretations for each component are:
-* comp 1 = wins and efficiency (G, W, WAB, ADJOE, ADJDE, EFG_D)
-  + All of these variables are positively correlated with each other, except for EFG_D. (See top of document for descriptions of each variable.)
+
+* comp 1 = wins and efficiency (G, W, WAB, ADJOE, ADJDE (-), EFG_D (-))
+  + All of these variables are positively correlated with each other, except for ADJDE and EFG_D. (See top of document for descriptions of each variable.)
   + EFG_D barely meets the threshold, but we still decided to include it. This variable refers to field goal percentage of opponent, and it makes sense that this is negative because as efficiency and wins increase, the opposing teams field goal percentage decreases.  
   
 * comp 2 = shooting offense and defense (EFG_O, EFG_D, X2P_O, X2P_D, X3P_O)
@@ -183,8 +215,8 @@ Using a threshold of 0.3, our possible interpretations for each component are:
   + G and ADJ_T are positively correlated, but EFG_O and X3P_O are negatively correlated. (See top of document for descriptions of each variable.)
   + Based on the correlations between these variables, the interpretation of as tempo increases, efficiency decreases, does not make sense. 
 
-#Question 5
-###Make a score plot of the scores for at least one pair of component scores (one and two, one and three, two and three, etc). Discuss any trends/groupings you observe (probably, this will be ‘none’). As a bonus, try to make a 95% Confidence Ellipse for two of your components. You might want to also try making a bi-plot if you’re using R.
+# Question 5
+### Make a score plot of the scores for at least one pair of component scores (one and two, one and three, two and three, etc). Discuss any trends/groupings you observe (probably, this will be ‘none’). As a bonus, try to make a 95% Confidence Ellipse for two of your components. You might want to also try making a bi-plot if you’re using R.
 
 ```{r}
 source("http://reuningscherer.net/stat660/r/ciscoreplot.R.txt")
@@ -208,8 +240,8 @@ Looking at the length and direction of the vectors, we concluded:
 * The variables BARTHAG, G, X2P_O, EFG_O affect both component 1 and component 2.
 
 
-#Question 6
-###Write a paragraph summarizing your findings, and your opinions about the effectiveness of using principle components on this data. Include evidence based on scatterplots of linearity in higher dimensional space, note any multivariate outliers in your score plot, comment on sample size relative to number of variables, etc.
+# Question 6
+### Write a paragraph summarizing your findings, and your opinions about the effectiveness of using principle components on this data. Include evidence based on scatterplots of linearity in higher dimensional space, note any multivariate outliers in your score plot, comment on sample size relative to number of variables, etc.
 
-  We first started by looking at box-plots and normal quantile plots for each individual variable. We removed all variables that did not appear to be continuous (step functions), and the variable barthag that was left skewed, and was still left skewed after attempting transformations. The remaining histograms and normal quantile plots led us to believe that the rest of our variables were approximately normal distributed. When looking at the correlation plot, there were many pastel, eclipses that did not appear very skinny. Even though we removed some variables that did not seem highly correlated with any other variables, the resulting correlation plot still appeared to have many pastel ellipses. This would lead us to believe that PCA may not be incredibly effective. For the chi-squared quantile plot, we saw one distinct outlier, but overallthe graph appeared relatively linear.After a few different tests (mainly parallel analysis because our data appeared MVN), we ultimately, we decided to use 3 principle components, more generally representing, wins and efficiency, shooting offense and defense, and tempo and efficiency. Using these principle components explains approximately 38% of the overall variability. 
+  We first started by looking at box-plots and normal quantile plots for each individual variable. We removed all variables that did not appear to be continuous (step functions) in addition to the variable BARTHAG that was left skewed, and was still left skewed after attempting transformations. The remaining histograms and normal quantile plots led us to believe that the rest of our variables were approximately normal distributed. When looking at the correlation plot, there were many pastel, eclipses that did not appear very skinny. Even though we removed some variables that did not seem highly correlated with any other variables, the resulting correlation plot still appeared to have many pastel ellipses. This would lead us to believe that PCA may not be incredibly effective. For the chi-squared quantile plot, we saw one distinct outlier, but overallthe graph appeared relatively linear. After a few different tests (mainly parallel analysis because our data appeared MVN), ultimately, we decided to use 3 principle components, more generally representing, wins and efficiency, shooting offense and defense, and tempo and efficiency. Using these principle components explains approximately 38% of the overall variability. 
   In the score plots, we determined which directions for the principle components were positive and negative based on prior knowledge of college basketball and outlier teams. For example, Kentucky, Virginia, San Diego St., and Louisville were positive outliers in the direction of PC2, shooting offense and defense. Teams that often go very far in the NCAA tournament such as Gonzaga, Villanova, and Duke are positive outliers in the PC 1 direction, wins and efficiency.
