@@ -98,7 +98,7 @@ bballNumeric_noNames <- bballNumeric[,-c(1)]
 # }
 
 ```
-Using the histograms, BARTHAG is the only plot that does not look normally distrbuted. It looks left skewed. We did a log transformation of BARTHAG, but it still appeared left skewed. Therefore, we decided to remove BARTHAG. Using the quantile plots, BARTHAG, seed, and year are not normally distributed. Seed and year were categorical numeric variables, we decided to remove those as well instead of trying transformations.
+Using the boxplots, BARTHAG is the only plot that does not look normally distrbuted. It looks left skewed. We did a log transformation of BARTHAG, but it still appeared left skewed. Therefore, we decided to remove BARTHAG. Using the quantile plots, BARTHAG, seed, and year are not normally distributed. Seed and year were categorical numeric variables, we decided to remove those as well instead of trying transformations.
 
 ```{r}
 #install.packages("corrplot")
@@ -235,13 +235,13 @@ biplot(pc,choices=c(1,2),pc.biplot=T)
 
 ```
 Looking at the length and direction of the vectors, we concluded:
-* component 1 is most affected by the variables W, ADJOE, X3P_O, FTRD
-* component 2 is most affected by the variables X3P_D, YEAR, ADJ_T, X2P_D
-* The variables BARTHAG, G, X2P_O, EFG_O affect both component 1 and component 2.
+* component 1 is most affected by the variables G, W, ADJOE, and ADJDE.
+* component 2 is most affected by the variables EFG_O, EFG_D, ADJDE, and ADJOE.
+* The variables ADJDE and ADJOE affect both component 1 and component 2.
 
 
 # Question 6
 ### Write a paragraph summarizing your findings, and your opinions about the effectiveness of using principle components on this data. Include evidence based on scatterplots of linearity in higher dimensional space, note any multivariate outliers in your score plot, comment on sample size relative to number of variables, etc.
 
-  We first started by looking at box-plots and normal quantile plots for each individual variable. We removed all variables that did not appear to be continuous (step functions) in addition to the variable BARTHAG that was left skewed, and was still left skewed after attempting transformations. The remaining histograms and normal quantile plots led us to believe that the rest of our variables were approximately normal distributed. When looking at the correlation plot, there were many pastel, eclipses that did not appear very skinny. Even though we removed some variables that did not seem highly correlated with any other variables, the resulting correlation plot still appeared to have many pastel ellipses. This would lead us to believe that PCA may not be incredibly effective. For the chi-squared quantile plot, we saw one distinct outlier, but overallthe graph appeared relatively linear. After a few different tests (mainly parallel analysis because our data appeared MVN), ultimately, we decided to use 3 principle components, more generally representing, wins and efficiency, shooting offense and defense, and tempo and efficiency. Using these principle components explains approximately 38% of the overall variability. 
+  We first started by looking at boxplots and normal quantile plots for each individual variable. We removed all variables that did not appear to be continuous (step functions) in addition to the variable BARTHAG that was left skewed, and was still left skewed after attempting transformations. The remaining histograms and normal quantile plots led us to believe that the rest of our variables were approximately normal distributed. When looking at the correlation plot, there were many pastel, eclipses that did not appear very skinny. Even though we removed some variables that did not seem highly correlated with any other variables, the resulting correlation plot still appeared to have many pastel ellipses. This would lead us to believe that PCA may not be incredibly effective. For the chi-squared quantile plot, we saw one distinct outlier, but overallthe graph appeared relatively linear. After a few different tests (mainly parallel analysis because our data appeared MVN), ultimately, we decided to use 3 principle components, more generally representing, wins and efficiency, shooting offense and defense, and tempo and efficiency. Using these principle components explains approximately 38% of the overall variability. 
   In the score plots, we determined which directions for the principle components were positive and negative based on prior knowledge of college basketball and outlier teams. For example, Kentucky, Virginia, San Diego St., and Louisville were positive outliers in the direction of PC2, shooting offense and defense. Teams that often go very far in the NCAA tournament such as Gonzaga, Villanova, and Duke are positive outliers in the PC 1 direction, wins and efficiency.
